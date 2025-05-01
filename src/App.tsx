@@ -1,38 +1,51 @@
-import { useState } from 'react'
-import { Box, Button, DataList } from '@chakra-ui/react'
+import { Box } from "@chakra-ui/react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from "react";
+import Login from "./components/Login";
+import InstructorDashboard from "./components/InstructorDashboard";
+import StudentDashboard from "./components/StudentDashboard";
+import { User } from "./types";
 
-interface Student {
-  id: number
-  name: string
-  age: number
-  class: string
-}
-
-function App() {
-  const [students, setStudents] = useState<Student[]>([])
-
-  async function getStudents() {
-    const endpoint = '/data-api/rest/Students';
-    const response = await fetch(endpoint);
-    const data = await response.json();
-    console.table(data.value);
-    setStudents(data.value)
-  }
-
+export default function App() {
+  const [user, setUser] = useState<User | null>(null);
   return (
     <Box>
-      <Button onClick={getStudents}>Click</Button>
-      <DataList.Root orientation="horizontal" width={"50%"}>
-        {students.map(student => (
-          <DataList.Item key={student.id}>
-            <DataList.ItemLabel>{student.name}</DataList.ItemLabel>
-            <DataList.ItemValue>{student.age}</DataList.ItemValue>
-            <DataList.ItemValue>{student.class}</DataList.ItemValue>
-          </DataList.Item>
-        ))}
-      </DataList.Root>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              user ? (
+                <Navigate
+                  to={user.role === "instructor" ? "/instructor" : "/student"}
+                />
+              ) : (
+                <Login onLogin={setUser} />
+              )
+            }
+          />
+          <Route
+            path="/instructor"
+            element={
+              user?.role === "instructor" ? (
+                <InstructorDashboard instructorId={user.user_id} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/student"
+            element={
+              user?.role === "student" ? (
+                <StudentDashboard studentId={user.user_id} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+        </Routes>
+      </BrowserRouter>
     </Box>
-  )
+  );
 }
-
-export default App

@@ -47,6 +47,60 @@
           "role": "anonymous"
         }
       ]
+    },
+    "Users": {
+      "source": "dbo.Users",
+      "permissions": [
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "Courses": {
+      "source": "dbo.Courses",
+      "permissions": [
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "Instructors_Courses": {
+      "source": "dbo.Instructors_Courses",
+      "permissions": [
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "Schedules": {
+      "source": "dbo.Schedules",
+      "permissions": [
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "Attendance": {
+      "source": "dbo.Attendance",
+      "permissions": [
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ]
+    },
+    "Program": {
+      "source": "dbo.Program",
+      "permissions": [
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ]
     }
   }
 }
