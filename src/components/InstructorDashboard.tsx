@@ -23,6 +23,7 @@ import {
   createSchedule,
   getSchedules,
   getInstructorDetails,
+  deleteSchedule,
 } from "../services/api";
 import {
   formatDateFromDatetime,
@@ -30,6 +31,7 @@ import {
   formatToAmPm,
   getWeekdayFromDatetime,
 } from "@/services/dateConversionServices";
+import { MdDeleteForever } from "react-icons/md";
 
 interface InstructorDashboardProps {
   instructorId: number;
@@ -45,7 +47,7 @@ export default function InstructorDashboard({
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [selectValue, setSelectValue] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>();
+  const [selectedDate, setSelectedDate] = useState<string>("");
   const [radioValue, setRadioValue] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [courses, setCourses] = useState<string>("");
@@ -86,7 +88,13 @@ export default function InstructorDashboard({
 
   const handleCreateSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProgram) {
+    if (!selectedProgram || !selectedDate || !radioValue) {
+      const t = toaster.create({
+        title: "Please fill all the fields",
+        type: "error",
+        duration: 3000,
+      });
+      setToast(t);
       return;
     }
 
@@ -106,10 +114,11 @@ export default function InstructorDashboard({
         type: "success",
         duration: 3000,
       });
-
       setToast(t);
+
       setSelectedProgram(null);
       setSelectValue([]);
+      setSelectedDate("");
       setRadioValue(null);
     } catch (error) {
       toaster.create({
@@ -121,6 +130,27 @@ export default function InstructorDashboard({
       });
     }
   };
+
+  const handleDeleteSchedule = async (scheduleId: number) => {
+    const deletedSchedule = await deleteSchedule(scheduleId);
+    setIsLoading(true);
+    if(deletedSchedule){
+      const t = toaster.create({
+        title: "Schedule Deleted",
+        type: "success",
+        duration: 3000,
+      });
+      setToast(t);
+    }
+    else {
+      const t = toaster.create({
+        title: "Failed to delete schedule",
+        type: "error",
+        duration: 3000,
+      });
+      setToast(t);
+    }
+  }
 
   const programCollection = createListCollection({
     items: programs.map((p) => ({
@@ -138,11 +168,7 @@ export default function InstructorDashboard({
     <Container maxW="container.xl" py={8}>
       <Toaster />
       <VStack gap={8} align="stretch">
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems={"center"}
-        >
+        <Box display="flex" justifyContent="space-between" alignItems={"end"}>
           <Box width={"25%"}></Box>
           <Heading size="5xl" fontWeight={700} width={"50%"}>
             Instructor Dashboard
@@ -150,7 +176,7 @@ export default function InstructorDashboard({
           <Button
             onClick={onLogout}
             color={"white"}
-            backgroundColor={"red.800"}
+            backgroundColor={"red.600"}
             _hover={{ backgroundColor: "red.700" }}
           >
             Logout
@@ -163,29 +189,32 @@ export default function InstructorDashboard({
         </Text>
 
         <Text fontSize={"1.5rem"}>Schedules</Text>
-        <Box
-          borderWidth={1}
-          borderRadius="lg"
-          overflow="hidden"
-          bg="white"
-          boxShadow="sm"
-        >
+        <Box borderWidth={1} borderRadius="lg" overflow="hidden" boxShadow="sm">
           <Table.Root>
-            <Table.Header bg="gray.50" backgroundColor={"white"}>
-              <Table.Row backgroundColor={"gray.700"}>
-                <Table.ColumnHeader fontWeight={700}>
+            <Table.Header>
+              <Table.Row backgroundColor={"#1e88e5"}>
+                <Table.ColumnHeader></Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
                   Weekday
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Date</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Course</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Class</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
+                  Date
+                </Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
+                  Course
+                </Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
+                  Class
+                </Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
                   Start Time
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
                   End Time
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Type</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
+                  Type
+                </Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -204,6 +233,11 @@ export default function InstructorDashboard({
               ) : (
                 schedules.map((schedule) => (
                   <Table.Row key={schedule.id}>
+                    <Table.Cell>
+                      <button style={{"color": "red"}} onClick={() => handleDeleteSchedule(schedule.id)}>
+                        <MdDeleteForever cursor={"pointer"} color="red.600" size={22}/>
+                      </button>
+                    </Table.Cell>
                     <Table.Cell>
                       {getWeekdayFromDatetime(schedule.session_start)}
                     </Table.Cell>
@@ -228,7 +262,7 @@ export default function InstructorDashboard({
           </Table.Root>
         </Box>
 
-        <VStack gap={4} marginTop={"5%"} width={"50%"}>
+        <VStack gap={4} marginTop={"2%"} width={"50%"}>
           <Field.Root required onSubmit={handleCreateSchedule}>
             <Field.Label fontSize={"1.5rem"}>Create a Schedule</Field.Label>
             <Select.Root
@@ -269,6 +303,7 @@ export default function InstructorDashboard({
               <Input
                 name="start_time"
                 type="date"
+                value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
             </Field.Root>

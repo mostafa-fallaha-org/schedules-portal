@@ -90,3 +90,11 @@ export async function getInstructorDetails(
   const data = await response.json();
   return data.value[0];
 }
+
+export async function deleteSchedule(scheduleId: number): Promise<number> {
+  const response = await fetch(`${API_BASE}/Schedules/id/${scheduleId}`, {
+    method: "DELETE"
+  });
+  if (!response.ok) throw new Error("Failed to delete schedule");
+  return scheduleId;
+}

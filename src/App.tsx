@@ -5,32 +5,35 @@ import Login from "./components/Login";
 import InstructorDashboard from "./components/InstructorDashboard";
 import StudentDashboard from "./components/StudentDashboard";
 import { User } from "./types";
+import { useColorMode } from "@/components/ui/color-mode";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { setColorMode } = useColorMode();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    setColorMode("light");
+    const storedUser = sessionStorage.getItem("user");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Failed to parse stored user data:", error);
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
       }
     }
     setIsLoading(false);
   }, []);
 
   const handleLogin = (userData: User) => {
-    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
+    sessionStorage.setItem("user", JSON.stringify(userData));
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
     setUser(null);
+    sessionStorage.removeItem("user");
   };
 
   if (isLoading) {
@@ -39,7 +42,9 @@ export default function App() {
 
   return (
     <Box>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+      >
         <Routes>
           <Route
             path="/"

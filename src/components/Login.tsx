@@ -49,12 +49,11 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <Container maxW="container.sm" py={10}>
-      <Toaster />
-      <Box p={8} borderWidth={1} borderRadius="lg" boxShadow="lg" bg="white">
+    <Container display={"flex"} justifyContent={"center"} alignItems={"center"} minHeight={"70vh"}> 
+      <Box width={"40%"} padding={8} borderWidth={1} borderRadius="lg" boxShadow="lg"> 
         <VStack gap={4} as="form" onSubmit={handleSubmit}>
-          <Heading size="lg" color={"black"}>
-            University Portal Login
+          <Heading size="lg" color={"black"} fontSize={"1.5rem"} fontWeight={700}>
+            Login
           </Heading>
 
           <Field.Root required>
@@ -82,15 +81,16 @@ export default function Login({ onLogin }: LoginProps) {
           <Button
             type="submit"
             colorScheme="blue"
-            width="sm"
+            width="40%"
             loading={isLoading}
-            color={"black"}
-            borderColor={"black"}
-            _hover={{ backgroundColor: "black", color: "white" }}
+            color={"whilde"}
+            backgroundColor={"#1e88e5"}
+            _hover={{ backgroundColor: "#1976d2" }}
           >
             Login
           </Button>
         </VStack>
+        <Toaster />
       </Box>
     </Container>
   );

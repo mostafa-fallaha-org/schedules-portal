@@ -57,7 +57,7 @@ export default function StudentDashboard({
   return (
     <Container maxW="container.xl" py={8}>
       <VStack gap={8} align="stretch">
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="space-between" alignItems={"end"}>
           <Box width={"25%"}></Box>
           <Heading size="5xl" fontWeight={700} width={"50%"}>
             Student Dashboard
@@ -65,7 +65,7 @@ export default function StudentDashboard({
           <Button
             onClick={onLogout}
             color={"white"}
-            backgroundColor={"red.800"}
+            backgroundColor={"red.600"}
             _hover={{ backgroundColor: "red.700" }}
           >
             Logout
@@ -73,34 +73,28 @@ export default function StudentDashboard({
         </Box>
 
         <Text fontSize="md" color="gray.500">
-          name: {student?.name} <br />
+          Name: {student?.name} <br />
           Class: {student?.class}
         </Text>
 
         <Text fontSize={"1.5rem"}>Schedules</Text>
-        <Box
-          borderWidth={1}
-          borderRadius="lg"
-          overflow="hidden"
-          bg="white"
-          boxShadow="sm"
-        >
+        <Box borderWidth={1} borderRadius="lg" overflow="hidden" boxShadow="sm">
           <Table.Root>
             <Table.Header bg="gray.50" backgroundColor={"white"}>
-              <Table.Row backgroundColor={"gray.700"}>
-                <Table.ColumnHeader fontWeight={700}>
+              <Table.Row backgroundColor={"#1e88e5"}>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
                   Weekday
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Date</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Course</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Class</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>Date</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>Course</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>Class</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
                   Start Time
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>
                   End Time
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700}>Type</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight={700} color={"white"}>Type</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
