@@ -16,12 +16,13 @@ import {
   createListCollection,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
-import { Schedule, Program } from "../types";
+import { Schedule, Program, Instructor } from "../types";
 import {
   getInstructorCourses,
   getPrograms,
   createSchedule,
   getSchedules,
+  getInstructorDetails,
 } from "../services/api";
 import {
   formatDateFromDatetime,
@@ -32,25 +33,35 @@ import {
 
 interface InstructorDashboardProps {
   instructorId: number;
+  onLogout: () => void;
 }
 
 export default function InstructorDashboard({
   instructorId,
+  onLogout,
 }: InstructorDashboardProps) {
+  const [instructor, setInstructor] = useState<Instructor>();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [selectValue, setSelectValue] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>();
   const [radioValue, setRadioValue] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [courses, setCourses] = useState<string>("");
   const [toast, setToast] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const instructorData: Instructor = await getInstructorDetails(
+          instructorId
+        );
+        setInstructor(instructorData);
+
         const coursesData = await getInstructorCourses(instructorId);
         const courseCodes = coursesData.map((course) => course.course_code);
+        setCourses(courseCodes.join(" - "));
 
         const programsData = await getPrograms(courseCodes);
         setPrograms(programsData);
@@ -74,8 +85,6 @@ export default function InstructorDashboard({
   }, [instructorId, toast]);
 
   const handleCreateSchedule = async (e: React.FormEvent) => {
-    console.log(selectedDate);
-    console.log(selectedProgram);
     e.preventDefault();
     if (!selectedProgram) {
       return;
@@ -129,11 +138,29 @@ export default function InstructorDashboard({
     <Container maxW="container.xl" py={8}>
       <Toaster />
       <VStack gap={8} align="stretch">
-        <Box display="flex" justifyContent="center">
-          <Heading size="5xl" fontWeight={700}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems={"center"}
+        >
+          <Box width={"25%"}></Box>
+          <Heading size="5xl" fontWeight={700} width={"50%"}>
             Instructor Dashboard
           </Heading>
+          <Button
+            onClick={onLogout}
+            color={"white"}
+            backgroundColor={"red.800"}
+            _hover={{ backgroundColor: "red.700" }}
+          >
+            Logout
+          </Button>
         </Box>
+
+        <Text fontSize="md" color="gray.500">
+          Name: {instructor?.name} <br />
+          Courses: {courses}
+        </Text>
 
         <Text fontSize={"1.5rem"}>Schedules</Text>
         <Box
@@ -201,7 +228,7 @@ export default function InstructorDashboard({
           </Table.Root>
         </Box>
 
-        <VStack gap={4} marginTop={"5%"}>
+        <VStack gap={4} marginTop={"5%"} width={"50%"}>
           <Field.Root required onSubmit={handleCreateSchedule}>
             <Field.Label fontSize={"1.5rem"}>Create a Schedule</Field.Label>
             <Select.Root
@@ -209,7 +236,6 @@ export default function InstructorDashboard({
               collection={programCollection}
               value={selectValue}
               onValueChange={(e) => {
-                console.log(e.items[0].p);
                 setSelectedProgram(e.items[0].p);
                 setSelectValue(e.value);
               }}
@@ -247,11 +273,6 @@ export default function InstructorDashboard({
               />
             </Field.Root>
 
-            {/* <Field.Root required>
-            <Field.Label>End Time</Field.Label>
-            <Input name="end_time" type="datetime-local" />
-          </Field.Root> */}
-
             <RadioGroup.Root
               marginTop={"1%"}
               defaultValue="2"
@@ -273,8 +294,12 @@ export default function InstructorDashboard({
             </RadioGroup.Root>
 
             <Field.Root required marginTop={"2%"}>
-              <Button type="submit" onClick={handleCreateSchedule}>
-                Submit
+              <Button
+                type="submit"
+                onClick={handleCreateSchedule}
+                backgroundColor={"#06d6a0"}
+              >
+                Create
               </Button>
             </Field.Root>
           </Field.Root>

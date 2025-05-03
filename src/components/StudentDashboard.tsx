@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Box, Container, Heading, Table, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Table,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { Schedule, Student } from "../types";
 import { getStudentDetails, getStudentSchedules } from "../services/api";
@@ -11,9 +19,13 @@ import {
 
 interface StudentDashboardProps {
   studentId: number;
+  onLogout: () => void;
 }
 
-export default function StudentDashboard({ studentId }: StudentDashboardProps) {
+export default function StudentDashboard({
+  studentId,
+  onLogout,
+}: StudentDashboardProps) {
   const [student, setStudent] = useState<Student>();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,13 +33,10 @@ export default function StudentDashboard({ studentId }: StudentDashboardProps) {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const studentResult = await getStudentDetails(studentId);
-        const studentData: Student = studentResult.value[0];
-        console.log(studentData.class);
+        const studentData: Student = await getStudentDetails(studentId);
         setStudent(studentData);
 
         const data = await getStudentSchedules(studentData.class);
-        console.log(data);
         setSchedules(data);
       } catch (error) {
         toaster.create({
@@ -49,11 +58,21 @@ export default function StudentDashboard({ studentId }: StudentDashboardProps) {
     <Container maxW="container.xl" py={8}>
       <VStack gap={8} align="stretch">
         <Box display="flex" justifyContent="center">
-          <Heading size="5xl" fontWeight={700}>
+          <Box width={"25%"}></Box>
+          <Heading size="5xl" fontWeight={700} width={"50%"}>
             Student Dashboard
           </Heading>
+          <Button
+            onClick={onLogout}
+            color={"white"}
+            backgroundColor={"red.800"}
+            _hover={{ backgroundColor: "red.700" }}
+          >
+            Logout
+          </Button>
         </Box>
-        <Text fontSize="md" color="gray.600">
+
+        <Text fontSize="md" color="gray.500">
           name: {student?.name} <br />
           Class: {student?.class}
         </Text>
