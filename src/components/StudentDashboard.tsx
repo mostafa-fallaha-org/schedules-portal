@@ -73,7 +73,7 @@ export default function StudentDashboard({
         </Box>
 
         <Text fontSize="md" color="gray.500">
-          Name: {student?.name} <br />
+          Name: {student?.name.toUpperCase()} <br />
           Class: {student?.class}
         </Text>
 
@@ -87,7 +87,6 @@ export default function StudentDashboard({
                 </Table.ColumnHeader>
                 <Table.ColumnHeader fontWeight={700} color={"white"}>Date</Table.ColumnHeader>
                 <Table.ColumnHeader fontWeight={700} color={"white"}>Course</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight={700} color={"white"}>Class</Table.ColumnHeader>
                 <Table.ColumnHeader fontWeight={700} color={"white"}>
                   Start Time
                 </Table.ColumnHeader>
@@ -120,7 +119,6 @@ export default function StudentDashboard({
                       {formatDateFromDatetime(schedule.session_start)}
                     </Table.Cell>
                     <Table.Cell>{schedule.course_code}</Table.Cell>
-                    <Table.Cell>{schedule.class}</Table.Cell>
                     <Table.Cell>
                       {formatTimeFromDatetime(schedule.session_start)}
                     </Table.Cell>

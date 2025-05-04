@@ -25,6 +25,7 @@ export interface Course {
 export interface Instructor_Course {
   instructor_id: number;
   course_code: string;
+  class: string;
 }
 
 export interface Schedule {

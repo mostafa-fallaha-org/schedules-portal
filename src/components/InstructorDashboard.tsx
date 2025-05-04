@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import { Toaster, toaster } from "@/components/ui/toaster";
+import {
+  formatDateFromDatetime,
+  formatTimeFromDatetime,
+  getWeekdayFromDatetime,
+} from "@/services/dateConversionServices";
 import {
   Box,
   Button,
@@ -15,23 +20,16 @@ import {
   VStack,
   createListCollection,
 } from "@chakra-ui/react";
-import { Toaster, toaster } from "@/components/ui/toaster";
-import { Schedule, Program, Instructor } from "../types";
-import {
-  getInstructorCourses,
-  getPrograms,
-  createSchedule,
-  getSchedules,
-  getInstructorDetails,
-  deleteSchedule,
-} from "../services/api";
-import {
-  formatDateFromDatetime,
-  formatTimeFromDatetime,
-  formatToAmPm,
-  getWeekdayFromDatetime,
-} from "@/services/dateConversionServices";
+import { useEffect, useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
+import {
+  createSchedule,
+  deleteSchedule,
+  getInstructorCourses,
+  getInstructorDetails,
+  getSchedules,
+} from "../services/api";
+import { Instructor, Instructor_Course, Schedule } from "../types";
 
 interface InstructorDashboardProps {
   instructorId: number;
@@ -43,15 +41,20 @@ export default function InstructorDashboard({
   onLogout,
 }: InstructorDashboardProps) {
   const [instructor, setInstructor] = useState<Instructor>();
-  const [programs, setPrograms] = useState<Program[]>([]);
+  const [instructorCourses, setInstructorCourses] = useState<
+    Instructor_Course[]
+  >([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectValue, setSelectValue] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [dateValue, setDateValue] = useState<string>("");
+  const [startTimeValue, setStartTimeValue] = useState<string>("");
+  const [endTimeValue, setEndTimeValue] = useState<string>("");
   const [radioValue, setRadioValue] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [courses, setCourses] = useState<string>("");
   const [toast, setToast] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,11 +65,10 @@ export default function InstructorDashboard({
         setInstructor(instructorData);
 
         const coursesData = await getInstructorCourses(instructorId);
+        setInstructorCourses(coursesData);
+
         const courseCodes = coursesData.map((course) => course.course_code);
         setCourses(courseCodes.join(" - "));
-
-        const programsData = await getPrograms(courseCodes);
-        setPrograms(programsData);
 
         const schedulesData = await getSchedules(courseCodes);
         setSchedules(schedulesData);
@@ -88,7 +90,14 @@ export default function InstructorDashboard({
 
   const handleCreateSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProgram || !selectedDate || !radioValue) {
+    if (
+      !selectedCourse ||
+      !selectedClass ||
+      !dateValue ||
+      !startTimeValue ||
+      !endTimeValue ||
+      !radioValue
+    ) {
       const t = toaster.create({
         title: "Please fill all the fields",
         type: "error",
@@ -100,10 +109,10 @@ export default function InstructorDashboard({
 
     try {
       const newSchedule = await createSchedule({
-        session_start: selectedDate + "T" + selectedProgram.start_time,
-        session_end: selectedDate + "T" + selectedProgram.end_time,
-        class: selectedProgram.class,
-        course_code: selectedProgram.course_code,
+        session_start: startTimeValue,
+        session_end: endTimeValue,
+        class: selectedClass,
+        course_code: selectedCourse,
         fixed: radioValue === "Fixed" ? true : false,
       });
 
@@ -116,9 +125,12 @@ export default function InstructorDashboard({
       });
       setToast(t);
 
-      setSelectedProgram(null);
+      setSelectedCourse("");
+      setSelectedClass("");
       setSelectValue([]);
-      setSelectedDate("");
+      setDateValue("");
+      setStartTimeValue("");
+      setEndTimeValue("");
       setRadioValue(null);
     } catch (error) {
       toaster.create({
@@ -134,15 +146,14 @@ export default function InstructorDashboard({
   const handleDeleteSchedule = async (scheduleId: number) => {
     const deletedSchedule = await deleteSchedule(scheduleId);
     setIsLoading(true);
-    if(deletedSchedule){
+    if (deletedSchedule) {
       const t = toaster.create({
         title: "Schedule Deleted",
         type: "success",
         duration: 3000,
       });
       setToast(t);
-    }
-    else {
+    } else {
       const t = toaster.create({
         title: "Failed to delete schedule",
         type: "error",
@@ -150,17 +161,21 @@ export default function InstructorDashboard({
       });
       setToast(t);
     }
-  }
+  };
 
-  const programCollection = createListCollection({
-    items: programs.map((p) => ({
-      value: `${p.class} - ${p.course_code} - ${p.weekday} - ${formatToAmPm(
-        p.start_time
-      )} - ${formatToAmPm(p.end_time)}`,
-      label: `${p.class} - ${p.course_code} - ${p.weekday} - ${formatToAmPm(
-        p.start_time
-      )} - ${formatToAmPm(p.end_time)}`,
-      p,
+  const coursesCollection = createListCollection({
+    items: instructorCourses.map((c) => ({
+      value: c.course_code,
+      label: c.course_code,
+    })),
+  });
+
+  const classesCollection = createListCollection({
+    items: instructorCourses
+    .filter(c => c.course_code === selectedCourse)
+    .map((c) => ({
+      value: c.class,
+      label: c.class,
     })),
   });
 
@@ -234,8 +249,15 @@ export default function InstructorDashboard({
                 schedules.map((schedule) => (
                   <Table.Row key={schedule.id}>
                     <Table.Cell>
-                      <button style={{"color": "red"}} onClick={() => handleDeleteSchedule(schedule.id)}>
-                        <MdDeleteForever cursor={"pointer"} color="red.600" size={22}/>
+                      <button
+                        style={{ color: "red" }}
+                        onClick={() => handleDeleteSchedule(schedule.id)}
+                      >
+                        <MdDeleteForever
+                          cursor={"pointer"}
+                          color="red.600"
+                          size={22}
+                        />
                       </button>
                     </Table.Cell>
                     <Table.Cell>
@@ -262,77 +284,136 @@ export default function InstructorDashboard({
           </Table.Root>
         </Box>
 
-        <VStack gap={4} marginTop={"2%"} width={"50%"}>
+        <VStack gap={4} marginTop={"2%"} width={"100%"}>
           <Field.Root required onSubmit={handleCreateSchedule}>
             <Field.Label fontSize={"1.5rem"}>Create a Schedule</Field.Label>
-            <Select.Root
-              marginTop={"2%"}
-              collection={programCollection}
-              value={selectValue}
-              onValueChange={(e) => {
-                setSelectedProgram(e.items[0].p);
-                setSelectValue(e.value);
-              }}
-            >
-              <Select.HiddenSelect />
-              <Select.Label>Select Program</Select.Label>
-              <Select.Control>
-                <Select.Trigger>
-                  <Select.ValueText placeholder="Select Program" />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {programCollection.items.map((program) => (
-                      <Select.Item item={program} key={program.value}>
-                        {program.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
 
-            <Field.Root required marginTop={"1%"}>
-              <Field.Label>Start Time</Field.Label>
-              <Input
-                name="start_time"
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </Field.Root>
+            <HStack width={"100%"} marginTop={"2%"}>
+              <Select.Root
+                collection={coursesCollection}
+                value={selectedCourse ? [selectedCourse] : []}
+                onValueChange={(e) => {
+                  setSelectedCourse(e.items[0].value);
+                  // setSelectValue(e.value);
+                }}
+              >
+                <Select.HiddenSelect />
+                <Select.Label>Course</Select.Label>
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder="Select Course" />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {coursesCollection.items.map((course) => (
+                        <Select.Item item={course} key={course.value}>
+                          {course.label}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
 
-            <RadioGroup.Root
-              marginTop={"1%"}
-              defaultValue="2"
-              value={radioValue}
-              onValueChange={(e) => setRadioValue(e.value)}
-            >
-              <HStack gap="6">
-                <RadioGroup.Item key={"Fixed"} value={"Fixed"}>
-                  <RadioGroup.ItemHiddenInput />
-                  <RadioGroup.ItemIndicator />
-                  <RadioGroup.ItemText>Fixed</RadioGroup.ItemText>
-                </RadioGroup.Item>
-                <RadioGroup.Item key={"NotFixed"} value={"NotFixed"}>
-                  <RadioGroup.ItemHiddenInput />
-                  <RadioGroup.ItemIndicator />
-                  <RadioGroup.ItemText>Not Fixed</RadioGroup.ItemText>
-                </RadioGroup.Item>
-              </HStack>
-            </RadioGroup.Root>
+              <Select.Root
+                collection={classesCollection}
+                value={selectedClass ? [selectedClass] : []}
+                onValueChange={(e) => {
+                  setSelectedClass(e.items[0].value);
+                  // setSelectValue(e.value);
+                }}
+              >
+                <Select.HiddenSelect />
+                <Select.Label>Class</Select.Label>
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder="Select Class" />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {classesCollection.items.map((c) => (
+                        <Select.Item item={c} key={c.value}>
+                          {c.label}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+
+              <Field.Root required>
+                <Field.Label>Date</Field.Label>
+                <Input
+                  name="date"
+                  type="date"
+                  value={dateValue}
+                  onChange={(e) => setDateValue(e.target.value)}
+                />
+              </Field.Root>
+            </HStack>
+
+            <HStack width={"100%"} marginTop={"2%"}>
+              <Field.Root required>
+                <Field.Label>Start Time</Field.Label>
+                <Input
+                  name="start_time"
+                  type="time"
+                  value={startTimeValue}
+                  onChange={(e) => setStartTimeValue(e.target.value)}
+                />
+              </Field.Root>
+
+              <Field.Root required>
+                <Field.Label>End Time</Field.Label>
+                <Input
+                  name="end_time"
+                  type="time"
+                  value={endTimeValue}
+                  onChange={(e) => setEndTimeValue(e.target.value)}
+                />
+              </Field.Root>
+
+              <RadioGroup.Root
+              width={"100%"}
+                marginTop={"2%"}
+                defaultValue="2"
+                value={radioValue}
+                onValueChange={(e) => setRadioValue(e.value)}
+              >
+                <HStack gap="6">
+                  <RadioGroup.Item key={"Fixed"} value={"Fixed"}>
+                    <RadioGroup.ItemHiddenInput />
+                    <RadioGroup.ItemIndicator />
+                    <RadioGroup.ItemText>Fixed</RadioGroup.ItemText>
+                  </RadioGroup.Item>
+                  <RadioGroup.Item key={"NotFixed"} value={"NotFixed"}>
+                    <RadioGroup.ItemHiddenInput />
+                    <RadioGroup.ItemIndicator />
+                    <RadioGroup.ItemText>Not Fixed</RadioGroup.ItemText>
+                  </RadioGroup.Item>
+                </HStack>
+              </RadioGroup.Root>
+            </HStack>
 
             <Field.Root required marginTop={"2%"}>
               <Button
                 type="submit"
                 onClick={handleCreateSchedule}
-                backgroundColor={"#06d6a0"}
+                backgroundColor={"#0db39e"}
+                fontWeight={700}
+                _hover={{ backgroundColor: "#06d6a0" }}
               >
                 Create
               </Button>
