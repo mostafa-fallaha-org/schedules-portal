@@ -47,7 +47,6 @@ export default function InstructorDashboard({
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
-  const [selectValue, setSelectValue] = useState<string[]>([]);
   const [dateValue, setDateValue] = useState<string>("");
   const [startTimeValue, setStartTimeValue] = useState<string>("");
   const [endTimeValue, setEndTimeValue] = useState<string>("");
@@ -127,7 +126,6 @@ export default function InstructorDashboard({
 
       setSelectedCourse("");
       setSelectedClass("");
-      setSelectValue([]);
       setDateValue("");
       setStartTimeValue("");
       setEndTimeValue("");
