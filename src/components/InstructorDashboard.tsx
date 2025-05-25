@@ -25,11 +25,12 @@ import { MdDeleteForever } from "react-icons/md";
 import {
   createSchedule,
   deleteSchedule,
+  getCourses,
   getInstructorCourses,
   getInstructorDetails,
   getSchedules,
 } from "../services/api";
-import { Instructor, Instructor_Course, Schedule } from "../types";
+import { Course, Instructor, Instructor_Course, Schedule } from "../types";
 
 interface InstructorDashboardProps {
   instructorId: number;
@@ -45,6 +46,7 @@ export default function InstructorDashboard({
     Instructor_Course[]
   >([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [coursesDB, setCoursesDB] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [dateValue, setDateValue] = useState<string>("");
@@ -71,6 +73,9 @@ export default function InstructorDashboard({
 
         const schedulesData = await getSchedules(courseCodes);
         setSchedules(schedulesData);
+
+        const coursesDBData: Course[] = await getCourses();
+        setCoursesDB(coursesDBData);
       } catch (error) {
         toaster.create({
           title: "Error fetching data",
@@ -169,12 +174,12 @@ export default function InstructorDashboard({
   });
 
   const classesCollection = createListCollection({
-    items: instructorCourses
-    .filter(c => c.course_code === selectedCourse)
-    .map((c) => ({
-      value: c.class,
-      label: c.class,
-    })),
+    items: coursesDB
+      .filter((c) => c.code === selectedCourse)
+      .map((c) => ({
+        value: c.class,
+        label: c.class,
+      })),
   });
 
   return (
@@ -384,7 +389,7 @@ export default function InstructorDashboard({
               </Field.Root>
 
               <RadioGroup.Root
-              width={"100%"}
+                width={"100%"}
                 marginTop={"2%"}
                 defaultValue="2"
                 value={radioValue}

@@ -92,15 +92,6 @@
           "role": "anonymous"
         }
       ]
-    },
-    "Program": {
-      "source": "dbo.Program",
-      "permissions": [
-        {
-          "actions": ["*"],
-          "role": "anonymous"
-        }
-      ]
     }
   }
 }

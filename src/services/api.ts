@@ -5,6 +5,7 @@ import {
   Program,
   Instructor_Course,
   Student,
+  Course,
 } from "../types";
 
 const API_BASE = "/data-api/rest";
@@ -97,4 +98,11 @@ export async function deleteSchedule(scheduleId: number): Promise<number> {
   });
   if (!response.ok) throw new Error("Failed to delete schedule");
   return scheduleId;
+}
+
+export async function getCourses(): Promise<Course[]> {
+  const response = await fetch(`${API_BASE}/Courses`);
+  if (!response.ok) throw new Error("Failed to fetch Courses");
+  const data = await response.json();
+  return data.value;
 }

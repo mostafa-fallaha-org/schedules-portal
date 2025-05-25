@@ -1,7 +1,7 @@
 export interface User {
   user_id: number;
   username: string;
-  role: 'student' | 'instructor';
+  role: "student" | "instructor";
 }
 
 export interface Student {
@@ -19,13 +19,13 @@ export interface Instructor {
 export interface Course {
   code: string;
   name: string;
+  class: string;
   credits: number;
 }
 
 export interface Instructor_Course {
   instructor_id: number;
   course_code: string;
-  class: string;
 }
 
 export interface Schedule {
@@ -51,4 +51,4 @@ export interface Attendance {
   student_id: number;
   course_code: string;
   arrival_time: string;
-} 
+}
