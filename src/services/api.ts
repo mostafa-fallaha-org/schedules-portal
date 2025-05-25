@@ -10,9 +10,9 @@ import {
 
 const API_BASE = "/data-api/rest";
 
-export async function login(username: string, password: string): Promise<User> {
+export async function login(user_id: number, password: string): Promise<User> {
   const response = await fetch(
-    `${API_BASE}/Users?$filter=username eq '${username}' and password eq '${password}'`
+    `${API_BASE}/Users?$filter=user_id eq ${user_id} and password eq '${password}'`
   );
   if (!response.ok) throw new Error("Invalid credentials");
   const data = await response.json();
@@ -94,7 +94,7 @@ export async function getInstructorDetails(
 
 export async function deleteSchedule(scheduleId: number): Promise<number> {
   const response = await fetch(`${API_BASE}/Schedules/id/${scheduleId}`, {
-    method: "DELETE"
+    method: "DELETE",
   });
   if (!response.ok) throw new Error("Failed to delete schedule");
   return scheduleId;

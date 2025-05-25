@@ -26,7 +26,7 @@ export default function Login({ onLogin }: LoginProps) {
     setIsLoading(true);
 
     try {
-      const user = await login(username, password);
+      const user = await login(parseInt(username), password);
       onLogin(user);
       toaster.create({
         title: "Login successful",
@@ -49,10 +49,26 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <Container display={"flex"} justifyContent={"center"} alignItems={"center"} minHeight={"70vh"}> 
-      <Box width={"40%"} padding={8} borderWidth={1} borderRadius="lg" boxShadow="lg"> 
+    <Container
+      display={"flex"}
+      justifyContent={"center"}
+      alignItems={"center"}
+      minHeight={"70vh"}
+    >
+      <Box
+        width={"40%"}
+        padding={8}
+        borderWidth={1}
+        borderRadius="lg"
+        boxShadow="lg"
+      >
         <VStack gap={4} as="form" onSubmit={handleSubmit}>
-          <Heading size="lg" color={"black"} fontSize={"1.5rem"} fontWeight={700}>
+          <Heading
+            size="lg"
+            color={"black"}
+            fontSize={"1.5rem"}
+            fontWeight={700}
+          >
             Login
           </Heading>
 

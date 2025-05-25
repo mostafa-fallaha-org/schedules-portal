@@ -1,6 +1,5 @@
 export interface User {
   user_id: number;
-  username: string;
   role: "student" | "instructor";
 }
 
