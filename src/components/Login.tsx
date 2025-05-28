@@ -25,6 +25,22 @@ export default function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     setIsLoading(true);
 
+    const safePattern = /^[a-zA-Z0-9@$!_]+$/;
+    const usernameValid = safePattern.test(username);
+    const passwordValid = safePattern.test(password);
+
+    if (!usernameValid || !passwordValid) {
+      toaster.create({
+        title: "Invalid input",
+        description:
+          "Only letters, numbers, and the characters @ $ ! _ are allowed.",
+        type: "error",
+        duration: 3000,
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const user = await login(parseInt(username), password);
       onLogin(user);
