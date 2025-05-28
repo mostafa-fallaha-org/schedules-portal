@@ -22,8 +22,12 @@ export async function login(user_id: number, password: string): Promise<User> {
 export async function getStudentSchedules(
   classYear: string
 ): Promise<Schedule[]> {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const formattedDate = yesterday.toISOString().split(".")[0] + "Z";
+
   const response = await fetch(
-    `${API_BASE}/Schedules?$filter=class eq '${classYear}'`
+    `${API_BASE}/Schedules?$filter=class eq '${classYear}' and session_start gt ${formattedDate}`
   );
   if (!response.ok) throw new Error("Failed to fetch schedules");
   const data = await response.json();
@@ -52,10 +56,21 @@ export async function getPrograms(courseCodes: string[]): Promise<Program[]> {
 }
 
 export async function getSchedules(courseCodes: string[]): Promise<Schedule[]> {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  // Format to ISO string, without milliseconds and timezone
+  const formattedDate = yesterday.toISOString().split(".")[0] + "Z";
+
   const courseFilter = courseCodes
-    .map((code) => `course_code eq '${code}'`)
+    .map((code) => `(course_code eq '${code}')`)
     .join(" or ");
-  const response = await fetch(`${API_BASE}/Schedules?$filter=${courseFilter}`);
+
+  const filter = `(${courseFilter}) and session_start gt ${formattedDate}`;
+
+  const response = await fetch(
+    `${API_BASE}/Schedules?$filter=${encodeURIComponent(filter)}`
+  );
   if (!response.ok) throw new Error("Failed to fetch schedules");
   const data = await response.json();
   return data.value;
