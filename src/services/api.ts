@@ -7,16 +7,24 @@ import {
   Student,
   Course,
 } from "../types";
+import bcrypt from "bcryptjs";
 
 const API_BASE = "/data-api/rest";
 
 export async function login(user_id: number, password: string): Promise<User> {
   const response = await fetch(
-    `${API_BASE}/Users?$filter=user_id eq ${user_id} and password eq '${password}'`
+    `${API_BASE}/Users?$filter=user_id eq ${user_id}`
   );
-  if (!response.ok) throw new Error("Invalid credentials");
+  if (!response.ok) throw new Error("Login Failed");
+
   const data = await response.json();
-  return data.value[0];
+  const user = data.value[0];
+
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) throw new Error("Invalid credentials");
+
+  return user;
 }
 
 export async function getStudentSchedules(
