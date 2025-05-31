@@ -3,12 +3,9 @@
   "configurations": {
     "uni-portal": {
       "appLocation": ".",
-      "apiLocation": "api",
       "outputLocation": "dist",
-      "apiLanguage": "node",
-      "apiVersion": "16",
+      "dataApiLocation": "swa-db-connections",
       "appBuildCommand": "npm run build",
-      "apiBuildCommand": "npm run build --if-present",
       "run": "npm run dev",
       "appDevserverUrl": "http://localhost:5173"
     }
