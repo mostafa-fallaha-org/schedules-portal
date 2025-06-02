@@ -60,17 +60,21 @@ export default function InstructorDashboard({
   useEffect(() => {
     const fetchData = async () => {
       try {
+        //Get the details of the instructor : id and name
         const instructorData: Instructor = await getInstructorDetails(
           instructorId
         );
         setInstructor(instructorData);
 
+        //Get the courses that are taught by this instructor from the Instructor_Course table
         const coursesData = await getInstructorCourses(instructorId);
         setInstructorCourses(coursesData);
 
+        //Extract the course_code from each course in coursesData and join them with " - "
         const courseCodes = coursesData.map((course) => course.course_code);
         setCourses(courseCodes.join(" - "));
-
+        
+        //Get schedule records of the courses to this instructor
         const schedulesData = await getSchedules(courseCodes);
         setSchedules(schedulesData);
 

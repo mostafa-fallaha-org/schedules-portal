@@ -2,7 +2,6 @@ import {
   User,
   Instructor,
   Schedule,
-  Program,
   Instructor_Course,
   Student,
   Course,
@@ -27,19 +26,13 @@ export async function login(user_id: number, password: string): Promise<User> {
   return user;
 }
 
-export async function getStudentSchedules(
-  classYear: string
-): Promise<Schedule[]> {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const formattedDate = yesterday.toISOString().split(".")[0] + "Z";
-
-  const response = await fetch(
-    `${API_BASE}/Schedules?$filter=class eq '${classYear}' and session_start gt ${formattedDate}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch schedules");
+export async function getInstructorDetails(
+  instructorId: number
+): Promise<Instructor> {
+  const response = await fetch(`${API_BASE}/Instructors/id/${instructorId}`);
+  if (!response.ok) throw new Error("Failed to fetch instructor details");
   const data = await response.json();
-  return data.value;
+  return data.value[0];
 }
 
 export async function getInstructorCourses(
@@ -49,37 +42,6 @@ export async function getInstructorCourses(
     `${API_BASE}/Instructors_Courses?$filter=instructor_id eq ${instructorId}`
   );
   if (!response.ok) throw new Error("Failed to fetch instructor courses");
-  const data = await response.json();
-  return data.value;
-}
-
-export async function getPrograms(courseCodes: string[]): Promise<Program[]> {
-  const courseFilter = courseCodes
-    .map((code) => `course_code eq '${code}'`)
-    .join(" or ");
-  const response = await fetch(`${API_BASE}/Program?$filter=${courseFilter}`);
-  if (!response.ok) throw new Error("Failed to fetch programs");
-  const data = await response.json();
-  return data.value;
-}
-
-export async function getSchedules(courseCodes: string[]): Promise<Schedule[]> {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  // Format to ISO string, without milliseconds and timezone
-  const formattedDate = yesterday.toISOString().split(".")[0] + "Z";
-
-  const courseFilter = courseCodes
-    .map((code) => `(course_code eq '${code}')`)
-    .join(" or ");
-
-  const filter = `(${courseFilter}) and session_start gt ${formattedDate}`;
-
-  const response = await fetch(
-    `${API_BASE}/Schedules?$filter=${encodeURIComponent(filter)}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch schedules");
   const data = await response.json();
   return data.value;
 }
@@ -99,20 +61,25 @@ export async function createSchedule(
   return data;
 }
 
-export async function getStudentDetails(studentId: number): Promise<Student> {
-  const response = await fetch(`${API_BASE}/Students/id/${studentId}`);
-  if (!response.ok) throw new Error("Failed to fetch student details");
+export async function getSchedules(courseCodes: string[]): Promise<Schedule[]> {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  // Format to ISO string, without milliseconds and timezone
+  const formattedDate = yesterday.toISOString().split(".")[0] + "Z";
+  
+  const courseFilter = courseCodes
+  .map((code) => `(course_code eq '${code}')`)
+  .join(" or ");
+  
+  const filter = `(${courseFilter}) and session_start gt ${formattedDate}`;
+  
+  const response = await fetch(
+    `${API_BASE}/Schedules?$filter=${encodeURIComponent(filter)}`
+  );
+  if (!response.ok) throw new Error("Failed to fetch schedules");
   const data = await response.json();
-  return data.value[0];
-}
-
-export async function getInstructorDetails(
-  instructorId: number
-): Promise<Instructor> {
-  const response = await fetch(`${API_BASE}/Instructors/id/${instructorId}`);
-  if (!response.ok) throw new Error("Failed to fetch instructor details");
-  const data = await response.json();
-  return data.value[0];
+  return data.value;
 }
 
 export async function deleteSchedule(scheduleId: number): Promise<number> {
@@ -126,6 +93,28 @@ export async function deleteSchedule(scheduleId: number): Promise<number> {
 export async function getCourses(): Promise<Course[]> {
   const response = await fetch(`${API_BASE}/Courses`);
   if (!response.ok) throw new Error("Failed to fetch Courses");
+  const data = await response.json();
+  return data.value;
+}
+
+export async function getStudentDetails(studentId: number): Promise<Student> {
+  const response = await fetch(`${API_BASE}/Students/id/${studentId}`);
+  if (!response.ok) throw new Error("Failed to fetch student details");
+  const data = await response.json();
+  return data.value[0];
+}
+
+export async function getStudentSchedules(
+  classYear: string
+): Promise<Schedule[]> {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const formattedDate = yesterday.toISOString().split(".")[0] + "Z";
+
+  const response = await fetch(
+    `${API_BASE}/Schedules?$filter=class eq '${classYear}' and session_start gt ${formattedDate}`
+  );
+  if (!response.ok) throw new Error("Failed to fetch schedules");
   const data = await response.json();
   return data.value;
 }
