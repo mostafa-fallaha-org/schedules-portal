@@ -36,15 +36,6 @@ export interface Schedule {
   fixed: boolean;
 }
 
-export interface Program {
-  id: number;
-  class: string;
-  weekday: string;
-  course_code: string;
-  start_time: string;
-  end_time: string;
-}
-
 export interface Attendance {
   schedule_id: number;
   student_id: number;
