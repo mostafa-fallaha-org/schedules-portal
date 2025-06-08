@@ -117,8 +117,8 @@ export default function InstructorDashboard({
 
     try {
       const newSchedule = await createSchedule({
-        session_start: startTimeValue,
-        session_end: endTimeValue,
+        session_start: dateValue.concat(" ", startTimeValue),
+        session_end: dateValue.concat(" ", endTimeValue),
         class: selectedClass,
         course_code: selectedCourse,
         fixed: radioValue === "Fixed" ? true : false,
